@@ -50,6 +50,7 @@ public class ManagedConnectionFactoryPostProcessor
 		while (iterator != null && iterator.hasNext()) {
 			Map.Entry<String, LocalXADataSource> entry = iterator.next();
 			LocalXADataSource bean = entry.getValue();
+			// 获取所有LocalXADataSource的Bean, 进行初始化, 注入TransactionManager
 			this.initializeTransactionManagerIfNecessary(bean);
 		}
 	}
@@ -58,6 +59,7 @@ public class ManagedConnectionFactoryPostProcessor
 		if (target.getTransactionManager() == null) {
 			TransactionManager transactionManager = //
 					(TransactionManager) this.applicationContext.getBean(BEAN_TRANSACTION_MANAGER);
+			// 为LocalXADataSource注入从Spring容器中获取的TransactionManager事务管理器
 			target.setTransactionManager(transactionManager);
 		} // end-if (target.getTransactionManager() == null)
 	}
@@ -77,27 +79,33 @@ public class ManagedConnectionFactoryPostProcessor
 		Class<?>[] interfaces = clazz.getInterfaces();
 
 		if (this.hasAlreadyBeenWrappedBySelf(bean)) /* managed-connection-factory has already been wrapped */ {
+			// 如果已经被wrap包装过了. 就直接返回, 不再wrap包装
 			return bean;
 		} else if (LocalXADataSource.class.isInstance(bean)) {
+			// 对LocalXADataSource的实例Bean进行wrap包装处理
 			LocalXADataSource target = (LocalXADataSource) bean;
 			this.initializeTransactionManagerIfNecessary(target);
 			return bean;
 		} else if (BasicManagedDataSource.class.isInstance(bean)) /* spring boot auto configuration */ {
+			// 对BasicManagedDataSource的实例Bean进行wrap包装处理
 			BasicManagedDataSource managedDataSource = (BasicManagedDataSource) bean;
 			TransactionBeanFactory beanFactory = TransactionBeanFactoryImpl.getInstance();
 			managedDataSource.setTransactionManager(beanFactory.getTransactionManager());
 			return bean;
 		} else if (XADataSource.class.isInstance(bean)) {
+			// 对XADataSource的实例Bean进行wrap包装处理
 			XADataSource xaDataSource = (XADataSource) bean;
 			XADataSourceImpl wrappedDataSource = new XADataSourceImpl();
 			wrappedDataSource.setIdentifier(beanName);
 			wrappedDataSource.setXaDataSource(xaDataSource);
 			return wrappedDataSource;
 		} else if (XAConnectionFactory.class.isInstance(bean)) {
+			// 对XAConnectionFactory的实例Bean进行wrap包装处理, 创建一个动态代理
 			ManagedConnectionFactoryHandler interceptor = new ManagedConnectionFactoryHandler(bean);
 			interceptor.setIdentifier(beanName);
 			return Proxy.newProxyInstance(cl, interfaces, interceptor);
 		} else if (ManagedConnectionFactory.class.isInstance(bean)) {
+			// 对ManagedConnectionFactory的实例Bean进行wrap包装处理, 创建一个动态代理
 			ManagedConnectionFactoryHandler interceptor = new ManagedConnectionFactoryHandler(bean);
 			interceptor.setIdentifier(beanName);
 			return Proxy.newProxyInstance(cl, interfaces, interceptor);
@@ -112,10 +120,15 @@ public class ManagedConnectionFactoryPostProcessor
 		}
 
 		if (Proxy.isProxyClass(bean.getClass()) == false) {
+			// 如果不是代理类, 就说明没有被wrap包装过, 需要进行wrap包装
 			return false;
 		}
 
+		// 如果是代理类, 就获取代理类的原始InvocationHandler
 		InvocationHandler handler = Proxy.getInvocationHandler(bean);
+		// 判断原始的InvocationHandler是否是ManagedConnectionFactoryHandler的实例对象
+		// 如果是, 就说明被wrap包装过, 不需要重复进行wrap包装
+		// 如果不是, 就说明没有被wrap包装过, 需要进行wrap包装
 		return ManagedConnectionFactoryHandler.class.isInstance(handler);
 	}
 

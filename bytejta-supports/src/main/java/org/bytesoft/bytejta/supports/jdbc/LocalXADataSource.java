@@ -46,6 +46,7 @@ public class LocalXADataSource /* extends TransactionListenerAdapter */
 		try {
 			Transaction transaction = (Transaction) this.transactionManager.getTransaction();
 			if (transaction == null) {
+				// 如果没开启事务, 就直接返回Connection
 				return this.dataSource.getConnection();
 			}
 
