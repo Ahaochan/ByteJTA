@@ -26,6 +26,7 @@ public class SimpleWork implements Runnable {
 	private WorkListener workListener;
 
 	public void run() {
+		// 拦截work的开始和结束, 作为扩展点
 		this.workListener.workStarted(new WorkEvent(this.source, WorkEvent.WORK_STARTED, this.work, null));
 		this.work.run();
 		this.workListener.workCompleted(new WorkEvent(this.source, WorkEvent.WORK_COMPLETED, this.work, null));

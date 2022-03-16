@@ -70,10 +70,12 @@ public class SimpleWorkManager implements WorkManager {
 			throws WorkException {
 		SimpleWorkListener wrappedListener = new SimpleWorkListener(workListener);
 		wrappedListener.workAccepted(new WorkEvent(this, WorkEvent.WORK_ACCEPTED, work, null));
+		// 将Work封装成一个Runnable
 		SimpleWork task = new SimpleWork();
 		task.setSource(this);
 		task.setWork(work);
 		task.setWorkListener(wrappedListener);
+		// 丢到线程池里去执行
 		this.executor.submit(task);
 		return wrappedListener.waitForStart();
 	}

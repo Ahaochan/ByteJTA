@@ -38,11 +38,18 @@ public class ResourceAdapterImpl implements ResourceAdapter {
 	private List<Work> workList = new ArrayList<Work>();;
 	private WorkManager workManager;
 
+	// 传入的是org.springframework.jca.support.SimpleBootstrapContext
 	public void start(BootstrapContext ctx) throws ResourceAdapterInternalException {
+		// 拿到org.bytesoft.transaction.work.SimpleWorkManager
 		this.workManager = ctx.getWorkManager();
+		// 这里的work有
+		// org.bytesoft.bytetcc.work.CompensableWork
+		// org.bytesoft.bytejta.logging.SampleTransactionLogger
+		// org.bytesoft.bytetcc.work.vfs.CleanupWork
 		for (int i = 0; this.workList != null && i < this.workList.size(); i++) {
 			Work work = this.workList.get(i);
 			try {
+				// 将Work封装成一个Runnable, 丢到线程池里去执行
 				this.workManager.startWork(work);
 			} catch (WorkException ex) {
 				this.stop();
@@ -80,6 +87,7 @@ public class ResourceAdapterImpl implements ResourceAdapter {
 	}
 
 	public void setWorkList(List<Work> workList) {
+		// bytejta-supports-task.xml, 从Spring容器中获取所有注册的TransactionWork实例Bean
 		this.workList = workList;
 	}
 
