@@ -72,14 +72,17 @@ public class TransactionCoordinator implements RemoteCoordinator, TransactionBea
 			throw new XAException(XAException.XAER_PROTO);
 		}
 
+		// 拿到事务的Xid
 		TransactionXid globalXid = (TransactionXid) transactionContext.getXid();
 		Transaction transaction = null;
 		try {
+			// 从仓储Repository中根据事务的Xid拿到事务对象
 			transaction = transactionRepository.getTransaction(globalXid);
 		} catch (TransactionException tex) {
 			throw new XAException(XAException.XAER_RMERR);
 		}
 
+		// 如果拿不到, 就创建一个事务对象, 放入仓储Repository中
 		if (transaction == null) {
 			transaction = new TransactionImpl(transactionContext);
 			((TransactionImpl) transaction).setBeanFactory(this.beanFactory);
