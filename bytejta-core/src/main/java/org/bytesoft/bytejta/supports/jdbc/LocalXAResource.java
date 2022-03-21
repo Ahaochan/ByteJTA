@@ -210,6 +210,7 @@ public class LocalXAResource implements XAResource {
 				throw new XAException(XAException.XAER_PROTO);
 			}
 
+			// 回滚本地事务
 			this.managedConnection.rollbackLocalTransaction();
 		} catch (XAException xae) {
 			throw xae;

@@ -104,6 +104,7 @@ public class LocalXAConnection implements XAConnection {
 
 	public void rollbackLocalTransaction() throws SQLException {
 		try {
+			// 回滚本地事务
 			this.connection.rollback();
 		} catch (SQLException ex) {
 			throw ex;

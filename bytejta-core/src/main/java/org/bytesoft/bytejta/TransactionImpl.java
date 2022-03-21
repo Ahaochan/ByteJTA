@@ -1014,6 +1014,7 @@ public class TransactionImpl implements Transaction {
 			this.recover(); // Execute recoveryInit if transaction is recovered from tx-log.
 			this.invokeParticipantRollback();
 		} else {
+			// 回滚事务
 			this.invokeParticipantRollback();
 		}
 

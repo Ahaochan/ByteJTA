@@ -106,6 +106,7 @@ public class XAResourceArchive implements XAResource {
 		} else if (this.rolledback) {
 			// ignore
 		} else {
+			// 调用动态代理SpringCloudCoordinator
 			descriptor.rollback(xid);
 		}
 

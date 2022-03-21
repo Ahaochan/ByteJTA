@@ -434,6 +434,7 @@ public class TransactionCoordinator implements RemoteCoordinator, TransactionBea
 
 			this.beanFactory.getTransactionTimer().stopTiming(transaction);
 
+			// 回滚事务
 			transaction.participantRollback();
 			transaction.forgetQuietly(); // forget transaction
 		} catch (RollbackRequiredException rrex) {

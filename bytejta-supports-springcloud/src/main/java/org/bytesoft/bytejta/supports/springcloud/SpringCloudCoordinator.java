@@ -93,6 +93,7 @@ public class SpringCloudCoordinator implements InvocationHandler {
 		}
 	}
 
+	// 根据方法名, 拼接url, 调用远程服务接口
 	public Object invokeHttpPostRequest(Object proxy, Method method, Object[] args) throws Throwable {
 
 		Class<?> returnType = method.getReturnType();
@@ -106,16 +107,20 @@ public class SpringCloudCoordinator implements InvocationHandler {
 					? null : StringUtils.trimToEmpty(this.environment.getProperty(contextPathKey));
 
 			StringBuilder ber = new StringBuilder();
+			// http://${serverHost}:${serverPort}
 			ber.append("http://").append(remoteNode.getServerHost()).append(":").append(remoteNode.getServerPort());
 
 			if (StringUtils.isNotBlank(contextPath) || StringUtils.equals(contextPath, "/")) {
 				ber.append(contextPath.startsWith("/") ? "" : "/").append(contextPath);
 			} // end-if (StringUtils.isNotBlank(contextPath) || StringUtils.equals(contextPath, "/"))
 
+			// http://${serverHost}:${serverPort}/org/bytesoft/bytejta/
 			ber.append("/org/bytesoft/bytejta/");
+			// http://${serverHost}:${serverPort}/org/bytesoft/bytejta/${methodName}
 			ber.append(method.getName());
 			for (int i = 0; i < args.length; i++) {
 				Serializable arg = (Serializable) args[i];
+				// http://${serverHost}:${serverPort}/org/bytesoft/bytejta/${methodName}/${xid}
 				ber.append("/").append(this.serialize(arg));
 			}
 
