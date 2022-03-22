@@ -51,6 +51,7 @@ public class XAResourceArchive implements XAResource {
 		} else if (this.rolledback) {
 			throw new XAException(XAException.XA_HEURRB);
 		} else {
+			// 调用动态代理SpringCloudCoordinator
 			descriptor.commit(xid, onePhase);
 		}
 	}
